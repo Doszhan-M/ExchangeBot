@@ -1,7 +1,8 @@
-import json
-import requests
+import telebot
 
-from config import *
+from extensions import *
+
+bot = telebot.TeleBot(TOKEN)
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -23,11 +24,19 @@ def values(message: telebot.types.Message):
 
 @bot.message_handler(content_types=['text'])
 def converter(message: telebot.types.Message):
-    quote, base, amount = message.text.split(' ')
-    r = requests.get(f'https://api.exchangeratesapi.io/latest?base={exchanger[quote]}&symbols={exchanger[base]}')
-    total = int(amount) * round(json.loads(r.content)['rates'][exchanger[base]], 2)
-    text = f'Цена {amount} {quote} в {base} -- {total} {exchanger[base]}'
-    bot.reply_to(message, text)
+    values = message.text.split(' ')
+    try:
+        if len(values) != 3:
+            raise ConversionException('Слишком много параметров')
+        quote, base, amount = values
+        total = Convertor.convert(quote, base, amount)
+    except ConversionException as e:
+        bot.reply_to(message, f'Ошибка пользователя \n{e}')
+    except Exception as e:
+        bot.reply_to(message, f'Не удалось обработать команду \n{e}')
+    else:
+        text = f'Цена {amount} {quote} в {base} -- {total} {exchanger[base]}'
+        bot.reply_to(message, text)
 
 
 bot.polling(none_stop=True, interval=0)

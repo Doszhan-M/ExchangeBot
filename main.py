@@ -25,6 +25,7 @@ def values(message: telebot.types.Message):
 @bot.message_handler(content_types=['text'])
 def converter(message: telebot.types.Message):
     values = message.text.split(' ')
+    values = list(map(str.lower, values))
     try:
         if len(values) != 3:
             raise APIException('Слишком много параметров')

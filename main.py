@@ -27,10 +27,10 @@ def converter(message: telebot.types.Message):
     values = message.text.split(' ')
     try:
         if len(values) != 3:
-            raise ConversionException('Слишком много параметров')
+            raise APIException('Слишком много параметров')
         quote, base, amount = values
-        total = Convertor.convert(quote, base, amount)
-    except ConversionException as e:
+        total = Convertor.get_price(quote, base, amount)
+    except APIException as e:
         bot.reply_to(message, f'Ошибка пользователя \n{e}')
     except Exception as e:
         bot.reply_to(message, f'Не удалось обработать команду \n{e}')
